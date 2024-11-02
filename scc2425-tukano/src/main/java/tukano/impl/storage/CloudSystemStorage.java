@@ -28,7 +28,7 @@ public class CloudSystemStorage implements BlobStorage {
 	private final BlobContainerClient containerClient;
 	private static final int CHUNK_SIZE = 4096;
 
-	public CloudSystemStorage() {                                     // MUDAR KEY !!!
+	public CloudSystemStorage() {
 
 		Dotenv dotenv = Dotenv.configure().load();
 
