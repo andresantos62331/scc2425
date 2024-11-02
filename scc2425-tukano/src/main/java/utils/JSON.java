@@ -1,5 +1,7 @@
 package utils;
 
+import java.util.List;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,6 +32,16 @@ final public class JSON {
 		try {
 			var res = mapper.readValue(json, typeOf);
 			return res;
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	// New method to decode JSON arrays into List<T>
+	synchronized public static final <T> List<T> decodeList(String json, Class<T> elementClass) {
+		try {
+			return mapper.readValue(json, mapper.getTypeFactory().constructCollectionType(List.class, elementClass));
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 			return null;
