@@ -10,7 +10,7 @@ import tukano.api.Blobs;
 import tukano.api.Result;
 import tukano.impl.rest.TukanoRestServer;
 import tukano.impl.storage.BlobStorage;
-import tukano.impl.storage.FilesystemStorage;
+//import tukano.impl.storage.FilesystemStorage;
 import tukano.impl.storage.CloudSystemStorage;
 import utils.Hash;
 import utils.Hex;
@@ -30,7 +30,7 @@ public class JavaBlobs implements Blobs {
 	}
 	
 	private JavaBlobs() {
-		storage = new CloudSystemStorage(); //FilesystemStorage();
+		storage = new CloudSystemStorage(); // before: FilesystemStorage();
 		baseURI = String.format("%s/%s/", TukanoRestServer.serverURI, Blobs.NAME);
 	}
 	
