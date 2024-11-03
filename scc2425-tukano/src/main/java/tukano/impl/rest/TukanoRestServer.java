@@ -1,55 +1,56 @@
 package tukano.impl.rest;
 
-import java.net.URI;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
-import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
-import org.glassfish.jersey.server.ResourceConfig;
-
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 import tukano.impl.Token;
 import utils.Args;
 import utils.IP;
 
 
-public class TukanoRestServer {
-	final private static Logger Log = Logger.getLogger(TukanoRestServer.class.getName());
 
-	static final String INETADDR_ANY = "0.0.0.0";
+@ApplicationPath("/rest")
+public class TukanoRestServer extends Application {
+    private static final Logger Log = Logger.getLogger(TukanoRestServer.class.getName());
+
+    static final String INETADDR_ANY = "0.0.0.0";
 	static String SERVER_BASE_URI = "http://%s:%s/rest";
 
 	public static final int PORT = 8080;
 
 	public static String serverURI;
-			
-	static {
-		System.setProperty("java.util.logging.SimpleFormatter.format", "%4$s: %5$s");
-	}
-	
-	protected TukanoRestServer() {
-		serverURI = String.format(SERVER_BASE_URI, IP.hostname(), PORT);
-	}
+
+    private final Set<Object> singletons = new HashSet<>();
+    private final Set<Class<?>> resources = new HashSet<>();
+
+    public TukanoRestServer() {
 
 
-	protected void start() throws Exception {
-	
-		ResourceConfig config = new ResourceConfig();
-		
-		config.register(RestBlobsResource.class);
-		config.register(RestUsersResource.class); 
-		config.register(RestShortsResource.class);
-		
-		JdkHttpServerFactory.createHttpServer( URI.create(serverURI.replace(IP.hostname(), INETADDR_ANY)), config);
-		
-		Log.info(String.format("Tukano Server ready @ %s\n",  serverURI));
-	}
-	
-	
-	public static void main(String[] args) throws Exception {
-		Args.use(args);
-		
-		Token.setSecret( Args.valueOf("-secret", ""));
-//		Props.load( Args.valueOf("-props", "").split(","));
-		
-		new TukanoRestServer().start();
-	}
+        serverURI = String.format(SERVER_BASE_URI, IP.hostname(), PORT);
+        // Register REST resource classes
+        //resources.add(RestBlobsResource.class);
+        //resources.add(RestUsersResource.class);
+        //resources.add(RestShortsResource.class);
+
+        singletons.add(new RestBlobsResource());
+        singletons.add(new RestUsersResource());
+        singletons.add(new RestShortsResource());
+
+        // Load properties and configurations
+        Token.setSecret(Args.valueOf("-secret", ""));
+        Log.info("Tukano Application initialized with resources and singletons");
+    }
+
+    @Override
+    public Set<Class<?>> getClasses() {
+        return resources;
+    }
+
+    @Override
+    public Set<Object> getSingletons() {
+        return singletons;
+    }
 }
