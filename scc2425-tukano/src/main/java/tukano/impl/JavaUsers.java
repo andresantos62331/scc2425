@@ -55,8 +55,8 @@ public class JavaUsers implements Users {
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 			// Check if user is cached in Redis
 
-			var key = "user:" + userId;
-			String cachedUser = jedis.get(key);
+			var userKey = "user:" + userId;
+			String cachedUser = jedis.get(userKey);
 			if (cachedUser != null) {
 				User user = JSON.decode(cachedUser, User.class); // Deserialize JSON back to User object
 				if (user.getPwd().equals(pwd)) {
@@ -71,7 +71,7 @@ public class JavaUsers implements Users {
 				User user = dbResult.value();
 				if (user.getPwd().equals(pwd)) {
 					// Cache the user data in Redis for future requests
-					jedis.setex(key, 3600, JSON.encode(user)); // Cache for 1 hour (3600 seconds)
+					jedis.set(userKey,JSON.encode(user)); 
 					return ok(user);
 				} else {
 					return error(FORBIDDEN);
@@ -94,7 +94,9 @@ public class JavaUsers implements Users {
 			Result<User> updatedUser = DB.updateOne(user.updateFrom(other));
 			if (updatedUser.isOK()) {
 				try (Jedis jedis = RedisCache.getCachePool().getResource()) {
-					jedis.del("user:" + userId); // Invalidate cache for updated user
+					var userKey = "user:" + userId;
+					jedis.del(userKey); // Invalidate cache for updated user
+					//jedis.set(userKey, JSON.encode(updatedUser.value())); // Repopulate cache with updated user
 				}
 			}
 			return updatedUser;
@@ -117,7 +119,18 @@ public class JavaUsers implements Users {
 				JavaBlobs.getInstance().deleteAllBlobs(userId, Token.get(userId));
 			}).start();
 
-			return DB.deleteOne(user);
+			// Delete the user from the database
+			Result<User> result = DB.deleteOne(user);
+
+			// Invalidate cache for the deleted user if the deletion is successful
+			if (result.isOK()) {
+				try (Jedis jedis = RedisCache.getCachePool().getResource()) {
+					var userKey = "user:" + userId;
+					jedis.del(userKey); // Delete the cache entry for the user
+				}
+			}
+	
+			return result;
 		});
 	}
 
@@ -134,6 +147,7 @@ public class JavaUsers implements Users {
 				List<User> users = JSON.decodeList(cachedResult, User.class); // Convert JSON string back to list
 				// should see if the method decodeList is done correctly =?
 				// System.out.println(users);
+				//delete if cache gets easily full
 				return ok(users);
 			}
 		}
@@ -147,7 +161,7 @@ public class JavaUsers implements Users {
 
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 			// Cache result in Redis for future use
-			jedis.setex(cacheKey, 300, JSON.encode(hits)); // Cache for 5 minutes
+			jedis.set(cacheKey, JSON.encode(hits)); // Cache for 5 minutes
 		}
 
 		return ok(hits);
