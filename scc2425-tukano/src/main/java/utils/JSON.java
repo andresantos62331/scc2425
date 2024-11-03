@@ -38,7 +38,7 @@ final public class JSON {
 		}
 	}
 
-	// New method to decode JSON arrays into List<T>
+	// New method to decode JSON arrays into List<T> (this method was made with the help of AI)
 	synchronized public static final <T> List<T> decodeList(String json, Class<T> elementClass) {
 		try {
 			return mapper.readValue(json, mapper.getTypeFactory().constructCollectionType(List.class, elementClass));

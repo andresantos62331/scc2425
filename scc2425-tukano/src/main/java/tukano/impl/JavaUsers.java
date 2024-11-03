@@ -53,12 +53,11 @@ public class JavaUsers implements Users {
 			return error(BAD_REQUEST);
 
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
-			// Check if user is cached in Redis
 
 			var userKey = "user:" + userId;
 			String cachedUser = jedis.get(userKey);
 			if (cachedUser != null) {
-				User user = JSON.decode(cachedUser, User.class); // Deserialize JSON back to User object
+				User user = JSON.decode(cachedUser, User.class);
 				if (user.getPwd().equals(pwd)) {
 					return ok(user);
 				} else {
@@ -70,7 +69,6 @@ public class JavaUsers implements Users {
 			if (dbResult.isOK()) {
 				User user = dbResult.value();
 				if (user.getPwd().equals(pwd)) {
-					// Cache the user data in Redis for future requests
 					jedis.set(userKey,JSON.encode(user)); 
 					return ok(user);
 				} else {
@@ -122,7 +120,7 @@ public class JavaUsers implements Users {
 			// Delete the user from the database
 			Result<User> result = DB.deleteOne(user);
 
-			// Invalidate cache for the deleted user if the deletion is successful
+			// Invalidate cache for the deleted user
 			if (result.isOK()) {
 				try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 					var userKey = "user:" + userId;
