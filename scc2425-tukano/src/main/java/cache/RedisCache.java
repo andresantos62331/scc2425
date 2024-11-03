@@ -1,19 +1,15 @@
 package cache;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 public class RedisCache {
-
-	// Load environment variables from .env file
-    private static final Dotenv dotenv = Dotenv.load();
 	
-	private static final String RedisHostname = dotenv.get("REDIS_HOSTNAME");
-    private static final String RedisKey = dotenv.get("REDIS_KEY");
-    private static final int REDIS_PORT = Integer.parseInt(dotenv.get("REDIS_PORT", "6380"));
-    private static final int REDIS_TIMEOUT = Integer.parseInt(dotenv.get("REDIS_TIMEOUT", "1000"));
-    private static final boolean Redis_USE_TLS = Boolean.parseBoolean(dotenv.get("REDIS_USE_TLS", "true"));
+	private static final String RedisHostname = System.getProperty("REDIS_HOSTNAME");
+    private static final String RedisKey = System.getProperty("REDIS_KEY");
+    private static final int REDIS_PORT = Integer.parseInt(System.getProperty("REDIS_PORT", "6380"));
+    private static final int REDIS_TIMEOUT = Integer.parseInt(System.getProperty("REDIS_TIMEOUT", "1000"));
+    private static final boolean Redis_USE_TLS = Boolean.parseBoolean(System.getProperty("REDIS_USE_TLS", "true"));
 	
 	private static JedisPool instance;
 	

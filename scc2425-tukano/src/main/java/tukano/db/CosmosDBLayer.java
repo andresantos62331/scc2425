@@ -13,16 +13,13 @@ import com.azure.cosmos.models.CosmosItemRequestOptions;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.models.PartitionKey;
 
-import io.github.cdimascio.dotenv.Dotenv;
-
 import tukano.api.Result;
 import tukano.api.Result.ErrorCode;
 
 public class CosmosDBLayer {
-    static Dotenv dotenv = Dotenv.configure().load(); // load .env file
-    private static final String CONNECTION_URL = dotenv.get("COSMOSDB_URL");
-	private static final String DB_KEY = dotenv.get("COSMOSDB_KEY");
-	private static final String DB_NAME = dotenv.get("COSMOSDB_DATABASE");
+	private static final String CONNECTION_URL = System.getProperty("COSMOSDB_URL");
+	private static final String DB_KEY = System.getProperty("COSMOSDB_KEY");
+	private static final String DB_NAME = System.getProperty("COSMOSDB_DATABASE");
 	private static final String USERS_CONTAINER = "users";
 	private static final String SHORTS_CONTAINER = "shorts";
 	

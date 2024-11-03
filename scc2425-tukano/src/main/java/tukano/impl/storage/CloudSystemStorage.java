@@ -7,8 +7,6 @@ import static tukano.api.Result.ErrorCode.CONFLICT;
 import static tukano.api.Result.ErrorCode.INTERNAL_ERROR;
 import static tukano.api.Result.ErrorCode.NOT_FOUND;
 
-import io.github.cdimascio.dotenv.Dotenv;
-
 import java.util.Arrays;
 import java.util.function.Consumer;
 
@@ -30,10 +28,8 @@ public class CloudSystemStorage implements BlobStorage {
 
 	public CloudSystemStorage() {
 
-		Dotenv dotenv = Dotenv.configure().load();
-
 		// Get connection string in the storage access keys page
-		this.storageConnectionString = dotenv.get("STORAGE_CONNECTION_STRING");
+		this.storageConnectionString = System.getProperty("STORAGE_CONNECTION_STRING");
 
 		// Get container client
 		this.containerClient = new BlobContainerClientBuilder()
