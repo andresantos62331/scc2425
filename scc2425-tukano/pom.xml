@@ -55,7 +55,7 @@
 					<password>s3cret</password>
 					<mode>war</mode>
 					<update>true</update>
-					<path>/lab1</path>
+					<path>/tukano</path>
 				</configuration>
 			</plugin>
 			<plugin>
