@@ -138,7 +138,7 @@ public class JavaUsers implements Users {
 	public Result<List<User>> searchUsers(String pattern) {
 		Log.info(() -> format("searchUsers : patterns = %s\n", pattern));
 
-		String cacheKey = "search:" + pattern.toUpperCase();
+		//String cacheKey = "search:" + pattern.toUpperCase();
 
 		/*try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 			// Check cache
@@ -160,10 +160,10 @@ public class JavaUsers implements Users {
 				.map(User::copyWithoutPassword)
 				.toList();
 
-		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
+		/*try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 			// Cache result in Redis for future use
 			jedis.set(cacheKey, JSON.encode(hits)); // Cache for 5 minutes
-		}
+		}*/
 
 		return ok(hits);
 	}
