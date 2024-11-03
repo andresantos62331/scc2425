@@ -140,17 +140,18 @@ public class JavaUsers implements Users {
 
 		String cacheKey = "search:" + pattern.toUpperCase();
 
-		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
+		/*try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 			// Check cache
 			String cachedResult = jedis.get(cacheKey);
 			if (cachedResult != null) {
 				List<User> users = JSON.decodeList(cachedResult, User.class); // Convert JSON string back to list
 				// should see if the method decodeList is done correctly =?
 				// System.out.println(users);
-				//delete if cache gets easily full
+				//delete if cache gets easily full and
 				return ok(users);
 			}
-		}
+		}*/
+		//this is commented because there is probably a better way to work with lists in rediscache
 
 		// Query database if not in cache
 		var query = format("SELECT * FROM User u WHERE UPPER(u.userId) LIKE '%%%s%%'", pattern.toUpperCase());
