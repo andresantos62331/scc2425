@@ -91,19 +91,6 @@
 					</images>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.tomcat.maven</groupId>
-				<artifactId>tomcat7-maven-plugin</artifactId>
-				<version>2.1</version>
-				<configuration>
-					<url>http://maven:s3cret@127.0.0.1:8080/manager/text</url>
-					<server>tomcat-docker</server>
-					<update>true</update>
-					<path>/tukano</path>
-					<username>maven</username>
-					<password>s3cret</password>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
@@ -192,11 +179,6 @@
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
 			<version>5.0.1</version>
-		</dependency>
-		<dependency>
-    		<groupId>io.github.cdimascio</groupId>
-    		<artifactId>java-dotenv</artifactId>
-    		<version>5.2.2</version>
 		</dependency>
 	</dependencies>
 </project>

@@ -7,16 +7,25 @@ import static tukano.api.Result.ErrorCode.CONFLICT;
 import static tukano.api.Result.ErrorCode.INTERNAL_ERROR;
 import static tukano.api.Result.ErrorCode.NOT_FOUND;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
+
 import com.azure.core.util.BinaryData;
+//import com.azure.cosmos.implementation.Constants.Properties;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
 
 import tukano.api.Result;
 import utils.Hash;
+import utils.Props;
+import java.util.Properties;
+
+
 
 public class CloudSystemStorage implements BlobStorage {
 
@@ -27,11 +36,9 @@ public class CloudSystemStorage implements BlobStorage {
 	private static final int CHUNK_SIZE = 4096;
 
 	public CloudSystemStorage() {
-
 		// Get connection string in the storage access keys page
 		this.storageConnectionString = System.getProperty("STORAGE_CONNECTION_STRING");
 
-		// Get container client
 		this.containerClient = new BlobContainerClientBuilder()
 				.connectionString(storageConnectionString)
 				.containerName(BLOBS_CONTAINER_NAME)

@@ -1,7 +1,7 @@
 package tukano.impl.rest;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -13,7 +13,6 @@ import utils.Args;
 import utils.IP;
 import utils.Props;
 import java.util.Properties;
-
 
 
 @ApplicationPath("/rest")
@@ -43,16 +42,17 @@ public class TukanoRestServer extends Application {
         singletons.add(new RestUsersResource());
         singletons.add(new RestShortsResource());
 
+        Log.info("------------------------------ TUKANO ---------------------------");
+
 		try {
-		FileInputStream inputStream = new FileInputStream("src/main/resources/keys.props");
-		Properties properties = new Properties();
-		properties.load(inputStream);
-        String[] keyValuePairs = properties.entrySet().stream()
-                                               .map(e -> e.getKey() + "=" + e.getValue())
-                                               .toArray(String[]::new);
-        Props.load(keyValuePairs);
+			var in = Props.class.getClassLoader().getResourceAsStream("keys.props");
+			var reader = new InputStreamReader(in);
+			var props = new Properties();
+            props.load(reader);
+			props.forEach( (k,v) -> System.setProperty(k.toString(), v.toString()));
+			System.getenv().forEach( System::setProperty );
 		} catch (IOException e) {
-            System.err.println("Error loading props file: " + e.getMessage());
+			System.err.println("Error loading props file: " + e.getMessage());
         }
 
         // Load properties and configurations

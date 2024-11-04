@@ -20,11 +20,16 @@ import tukano.api.Users;
 import utils.DB;
 import utils.JSON;
 
+import tukano.db.CosmosDBLayer; 
+
+
+
 public class JavaUsers implements Users {
 
 	private static Logger Log = Logger.getLogger(JavaUsers.class.getName());
 
 	private static Users instance;
+	private CosmosDBLayer dbLayer;
 
 	synchronized public static Users getInstance() {
 		if (instance == null)
@@ -33,6 +38,7 @@ public class JavaUsers implements Users {
 	}
 
 	private JavaUsers() {
+		dbLayer = CosmosDBLayer.getInstance();
 	}
 
 	@Override
@@ -42,20 +48,20 @@ public class JavaUsers implements Users {
 		if (badUserInfo(user))
 			return error(BAD_REQUEST);
 
-		return errorOrValue(DB.insertOne(user), user.getUserId());
+		return errorOrValue(dbLayer.insertUser(user), user.getId());
 	}
 
 	@Override
-	public Result<User> getUser(String userId, String pwd) {
-		Log.info(() -> format("getUser : userId = %s, pwd = %s\n", userId, pwd));
+	public Result<User> getUser(String id, String pwd) {
+		Log.info(() -> format("getUser : id = %s, pwd = %s\n", id, pwd));
 
-		if (userId == null)
+		if (id == null)
 			return error(BAD_REQUEST);
 
 		try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 
-			var userKey = "user:" + userId;
-			String cachedUser = jedis.get(userKey);
+			var userKey = "user:" + id;
+			String cachedUser = jedis.get(userKey);        // TODO
 			if (cachedUser != null) {
 				User user = JSON.decode(cachedUser, User.class);
 				if (user.getPwd().equals(pwd)) {
@@ -65,7 +71,7 @@ public class JavaUsers implements Users {
 				}
 			}
 
-			Result<User> dbResult = DB.getOne(userId, User.class);
+			Result<User> dbResult = dbLayer.getUser(id, User.class);
 			if (dbResult.isOK()) {
 				User user = dbResult.value();
 				if (user.getPwd().equals(pwd)) {
@@ -82,17 +88,17 @@ public class JavaUsers implements Users {
 	}
 
 	@Override
-	public Result<User> updateUser(String userId, String pwd, User other) {
-		Log.info(() -> format("updateUser : userId = %s, pwd = %s, user: %s\n", userId, pwd, other));
+	public Result<User> updateUser(String id, String pwd, User other) {
+		Log.info(() -> format("updateUser : id = %s, pwd = %s, user: %s\n", id, pwd, other));
 
-		if (badUpdateUserInfo(userId, pwd, other))
+		if (badUpdateUserInfo(id, pwd, other))
 			return error(BAD_REQUEST);
 
-		return errorOrResult(validatedUserOrError(DB.getOne(userId, User.class), pwd), user -> {
+		return errorOrResult(validatedUserOrError(DB.getOne(id, User.class), pwd), user -> {
 			Result<User> updatedUser = DB.updateOne(user.updateFrom(other));
 			if (updatedUser.isOK()) {
 				try (Jedis jedis = RedisCache.getCachePool().getResource()) {
-					var userKey = "user:" + userId;
+					var userKey = "user:" + id;
 					jedis.del(userKey); // Invalidate cache for updated user
 					//jedis.set(userKey, JSON.encode(updatedUser.value())); // Repopulate cache with updated user
 				}
@@ -103,18 +109,18 @@ public class JavaUsers implements Users {
 
 
 	@Override
-	public Result<User> deleteUser(String userId, String pwd) {
-		Log.info(() -> format("deleteUser : userId = %s, pwd = %s\n", userId, pwd));
+	public Result<User> deleteUser(String id, String pwd) {
+		Log.info(() -> format("deleteUser : id = %s, pwd = %s\n", id, pwd));
 
-		if (userId == null || pwd == null)
+		if (id == null || pwd == null)
 			return error(BAD_REQUEST);
 
-		return errorOrResult(validatedUserOrError(DB.getOne(userId, User.class), pwd), user -> {
+		return errorOrResult(validatedUserOrError(DB.getOne(id, User.class), pwd), user -> {
 
 			// Delete user shorts and related info asynchronously in a separate thread
 			Executors.defaultThreadFactory().newThread(() -> {
-				JavaShorts.getInstance().deleteAllShorts(userId, pwd, Token.get(userId));
-				JavaBlobs.getInstance().deleteAllBlobs(userId, Token.get(userId));
+				JavaShorts.getInstance().deleteAllShorts(id, pwd, Token.get(id));
+				JavaBlobs.getInstance().deleteAllBlobs(id, Token.get(id));
 			}).start();
 
 			// Delete the user from the database
@@ -123,7 +129,7 @@ public class JavaUsers implements Users {
 			// Invalidate cache for the deleted user
 			if (result.isOK()) {
 				try (Jedis jedis = RedisCache.getCachePool().getResource()) {
-					var userKey = "user:" + userId;
+					var userKey = "user:" + id;
 					jedis.del(userKey); // Delete the cache entry for the user
 				}
 			}
@@ -152,7 +158,7 @@ public class JavaUsers implements Users {
 		//this is commented because there is probably a better way to work with lists in rediscache
 
 		// Query database if not in cache
-		var query = format("SELECT * FROM User u WHERE UPPER(u.userId) LIKE '%%%s%%'", pattern.toUpperCase());
+		var query = format("SELECT * FROM User u WHERE UPPER(u.id) LIKE '%%%s%%'", pattern.toUpperCase());
 		var hits = DB.sql(query, User.class)
 				.stream()
 				.map(User::copyWithoutPassword)
@@ -174,10 +180,10 @@ public class JavaUsers implements Users {
 	}
 
 	private boolean badUserInfo(User user) {
-		return (user.userId() == null || user.pwd() == null || user.displayName() == null || user.email() == null);
+		return (user.id() == null || user.pwd() == null || user.displayName() == null || user.email() == null);
 	}
 
-	private boolean badUpdateUserInfo(String userId, String pwd, User info) {
-		return (userId == null || pwd == null || info.getUserId() != null && !userId.equals(info.getUserId()));
+	private boolean badUpdateUserInfo(String id, String pwd, User info) {
+		return (id == null || pwd == null || info.getId() != null && !id.equals(info.getId()));
 	}
 }
