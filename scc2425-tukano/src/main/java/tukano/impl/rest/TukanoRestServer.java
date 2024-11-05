@@ -44,17 +44,18 @@ public class TukanoRestServer extends Application {
 
         Log.info("------------------------------ TUKANO ---------------------------");
 
-		try {
+/* 		try {
 			var in = Props.class.getClassLoader().getResourceAsStream("keys.props");
 			var reader = new InputStreamReader(in);
 			var props = new Properties();
             props.load(reader);
 			props.forEach( (k,v) -> System.setProperty(k.toString(), v.toString()));
 			System.getenv().forEach( System::setProperty );
+            
 		} catch (IOException e) {
 			System.err.println("Error loading props file: " + e.getMessage());
         }
-
+*/
         // Load properties and configurations
         Token.setSecret(Args.valueOf("-secret", ""));
         Log.info("Tukano Application initialized with resources and singletons");

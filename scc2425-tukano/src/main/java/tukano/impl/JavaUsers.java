@@ -48,7 +48,7 @@ public class JavaUsers implements Users {
 		if (badUserInfo(user))
 			return error(BAD_REQUEST);
 
-		return errorOrValue(dbLayer.insertUser(user), user.getId());
+		return errorOrValue(dbLayer.insertUser(user), user.getUserId());
 	}
 
 	@Override
@@ -94,8 +94,8 @@ public class JavaUsers implements Users {
 		if (badUpdateUserInfo(id, pwd, other))
 			return error(BAD_REQUEST);
 
-		return errorOrResult(validatedUserOrError(DB.getOne(id, User.class), pwd), user -> {
-			Result<User> updatedUser = DB.updateOne(user.updateFrom(other));
+		return errorOrResult(validatedUserOrError(dbLayer.getUser(id, User.class), pwd), user -> {
+			Result<User> updatedUser = dbLayer.updateUser(user.updateFrom(other));
 			if (updatedUser.isOK()) {
 				try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 					var userKey = "user:" + id;
@@ -115,7 +115,7 @@ public class JavaUsers implements Users {
 		if (id == null || pwd == null)
 			return error(BAD_REQUEST);
 
-		return errorOrResult(validatedUserOrError(DB.getOne(id, User.class), pwd), user -> {
+		return errorOrResult(validatedUserOrError(dbLayer.getUser(id, User.class), pwd), user -> {
 
 			// Delete user shorts and related info asynchronously in a separate thread
 			Executors.defaultThreadFactory().newThread(() -> {
@@ -124,7 +124,7 @@ public class JavaUsers implements Users {
 			}).start();
 
 			// Delete the user from the database
-			Result<User> result = DB.deleteOne(user);
+			Result<User> result = (Result<User>) dbLayer.deleteUser(user);
 
 			// Invalidate cache for the deleted user
 			if (result.isOK()) {
@@ -140,9 +140,9 @@ public class JavaUsers implements Users {
 
 	@Override
 	public Result<List<User>> searchUsers(String pattern) {
-		Log.info(() -> format("searchUsers : patterns = %s\n", pattern));
+		Log.info(() -> format("searchUsers : pattern = %s\n", pattern));
 
-		//String cacheKey = "search:" + pattern.toUpperCase();
+		String cacheKey = "search:" + pattern.toUpperCase();
 
 		/*try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 			// Check cache
@@ -159,17 +159,16 @@ public class JavaUsers implements Users {
 
 		// Query database if not in cache
 		var query = format("SELECT * FROM User u WHERE UPPER(u.id) LIKE '%%%s%%'", pattern.toUpperCase());
-		var hits = DB.sql(query, User.class)
-				.stream()
-				.map(User::copyWithoutPassword)
-				.toList();
+		var hits = dbLayer.queryUsers(User.class, query);
+		Log.info("hits = " + hits);
+		Log.info("hits.v = " + hits.value());
 
 		/*try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 			// Cache result in Redis for future use
-			jedis.set(cacheKey, JSON.encode(hits)); // Cache for 5 minutes
+			jedis.set(cacheKey, JSON.encode(hits));
 		}*/
 
-		return ok(hits);
+		return ok(hits.value());
 	}
 
 	private Result<User> validatedUserOrError(Result<User> res, String pwd) {
@@ -180,10 +179,10 @@ public class JavaUsers implements Users {
 	}
 
 	private boolean badUserInfo(User user) {
-		return (user.id() == null || user.pwd() == null || user.displayName() == null || user.email() == null);
+		return (user.userId() == null || user.pwd() == null || user.displayName() == null || user.email() == null);
 	}
 
 	private boolean badUpdateUserInfo(String id, String pwd, User info) {
-		return (id == null || pwd == null || info.getId() != null && !id.equals(info.getId()));
+		return (id == null || pwd == null || info.getUserId() != null && !id.equals(info.getUserId()));
 	}
 }
