@@ -36,21 +36,6 @@ public class CloudSystemStorage implements BlobStorage {
 	private static final int CHUNK_SIZE = 4096;
 
 	public CloudSystemStorage() {
-		// Get connection string in the storage access keys page
-
-		try {
-			var in = Props.class.getClassLoader().getResourceAsStream("keys.props");
-			var reader = new InputStreamReader(in);
-			var props = new Properties();
-            props.load(reader);
-			props.forEach( (k,v) -> System.setProperty(k.toString(), v.toString()));
-			System.getenv().forEach( System::setProperty );
-            
-		} catch (IOException e) {
-			System.err.println("Error loading props file: " + e.getMessage());
-        }
-
-
 		this.storageConnectionString = System.getProperty("STORAGE_CONNECTION_STRING");
 
 		System.err.println(this.storageConnectionString);

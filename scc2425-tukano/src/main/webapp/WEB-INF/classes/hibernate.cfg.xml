@@ -2,14 +2,14 @@
 <hibernate-configuration>
 	<session-factory>
 		<!-- JDBC Database connection settings -->
-		<property name="connection.driver_class">org.hsqldb.jdbcDriver</property>
-		<property name="connection.url">jdbc:hsqldb:mem:tukano</property>
-		<property name="connection.username">sa</property>
-		<property name="connection.password"></property>
+		<property name="connection.driver_class">org.postgresql.Driver</property>
+        <property name="connection.url">jdbc:postgresql://c-postgre-cluster-proj1.postgres.database.azure.com:5432/postgre-db-proj1</property>
+        <property name="connection.username">citus@c-postgre-cluster-proj1</property>
+        <property name="connection.password">postgresql2425#</property>
 		<!-- JDBC connection pool settings ... using built-in test pool -->
 		<property name="connection.pool_size">64</property>
 		<!-- Echo the SQL to stdout -->
-		<property name="show_sql">false</property>
+		<property name="show_sql">true</property>
 		<!-- Set the current session context -->
 		<property name="current_session_context_class">thread</property>
 		<!-- Drop and re-create the database schema on startup -->

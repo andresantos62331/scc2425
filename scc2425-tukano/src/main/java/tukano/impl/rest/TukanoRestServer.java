@@ -33,18 +33,9 @@ public class TukanoRestServer extends Application {
 
 
         serverURI = String.format(SERVER_BASE_URI, IP.hostname(), PORT);
-        // Register REST resource classes
-        //resources.add(RestBlobsResource.class);
-        //resources.add(RestUsersResource.class);
-        //resources.add(RestShortsResource.class);
 
-        singletons.add(new RestBlobsResource());
-        singletons.add(new RestUsersResource());
-        singletons.add(new RestShortsResource());
-
-        Log.info("------------------------------ TUKANO ---------------------------");
-
-/* 		try {
+        // Load props
+        try {
 			var in = Props.class.getClassLoader().getResourceAsStream("keys.props");
 			var reader = new InputStreamReader(in);
 			var props = new Properties();
@@ -55,7 +46,17 @@ public class TukanoRestServer extends Application {
 		} catch (IOException e) {
 			System.err.println("Error loading props file: " + e.getMessage());
         }
-*/
+
+        // Register REST resource classes
+        //resources.add(RestBlobsResource.class);
+        //resources.add(RestUsersResource.class);
+        //resources.add(RestShortsResource.class);
+
+        singletons.add(new RestBlobsResource());
+        singletons.add(new RestUsersResource());
+        singletons.add(new RestShortsResource());
+
+
         // Load properties and configurations
         Token.setSecret(Args.valueOf("-secret", ""));
         Log.info("Tukano Application initialized with resources and singletons");
