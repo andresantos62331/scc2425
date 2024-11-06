@@ -124,7 +124,7 @@ public class JavaShortsNoSQL implements Shorts {
 				return ok(JSON.decodeList(cachedShorts, String.class));
 			}
 
-			var query = format("SELECT s.shortId FROM Short s WHERE s.ownerId = '%s'", userId);
+			var query = format("SELECT s.shortId FROM Shorts s WHERE s.ownerId = '%s'", userId);
 			var shortIds = dbLayer.queryShorts(String.class, query);
 			jedis.set(cacheKey, JSON.encode(shortIds));
 			return errorOrValue(okUser(userId), shortIds);
@@ -145,7 +145,7 @@ public class JavaShortsNoSQL implements Shorts {
 	@Override
 	public Result<List<String>> followers(String userId, String password) {
 		Log.info(() -> format("followers : userId = %s, pwd = %s\n", userId, password));
-
+		
 		var query = format("SELECT f.follower FROM Following f WHERE f.followee = '%s'", userId);
 		return errorOrValue(okUser(userId, password), dbLayer.queryFollows(String.class, query));
 	}
@@ -178,9 +178,9 @@ public class JavaShortsNoSQL implements Shorts {
 		Log.info(() -> format("getFeed : userId = %s, pwd = %s\n", userId, password));
 
 		final var QUERY_FMT = """
-				SELECT s.shortId, s.timestamp FROM Short s WHERE	s.ownerId = '%s'
+				SELECT s.shortId, s.timestamp FROM Shorts s WHERE	s.ownerId = '%s'
 				UNION
-				SELECT s.shortId, s.timestamp FROM Short s, Following f
+				SELECT s.shortId, s.timestamp FROM Shorts s, Following f
 					WHERE
 						f.followee = s.ownerId AND f.follower = '%s'
 				ORDER BY s.timestamp DESC""";
@@ -208,7 +208,7 @@ public class JavaShortsNoSQL implements Shorts {
 			return error(FORBIDDEN);
 
 			// delete shorts
-			var query1 = format("DELETE Short s WHERE s.ownerId = '%s'", userId);
+			var query1 = format("DELETE Shorts s WHERE s.ownerId = '%s'", userId);
 			dbLayer.queryShorts(Short.class, query1);
 
 			// delete follows

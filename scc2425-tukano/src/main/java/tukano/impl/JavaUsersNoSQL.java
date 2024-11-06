@@ -158,7 +158,7 @@ public class JavaUsersNoSQL implements Users {
 		//this is commented because there is probably a better way to work with lists in rediscache
 
 		// Query database if not in cache
-		var query = format("SELECT * FROM User u WHERE UPPER(u.id) LIKE '%%%s%%'", pattern.toUpperCase());
+		var query = format("SELECT * FROM Users u WHERE UPPER(u.id) LIKE '%%%s%%'", pattern.toUpperCase());
 		var hits = dbLayer.queryUsers(User.class, query);
 		Log.info("hits = " + hits);
 		Log.info("hits.v = " + hits.value());

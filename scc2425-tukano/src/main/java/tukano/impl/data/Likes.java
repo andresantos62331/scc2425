@@ -10,29 +10,32 @@ import jakarta.persistence.Table;
 @Table(name = "likes")
 public class Likes {
 	
-	@Id 
+	@Id
+    String id;
+
 	String userId;
 	
-	@Id 
 	String shortId;
 	
-	public String getOwnerId() {
-		return ownerId;
-	}
-
-	public void setOwnerId(String ownerId) {
-		this.ownerId = ownerId;
-	}
-
 	String ownerId;
+	
 	
 	public Likes() {}
 
 	public Likes(String userId, String shortId, String ownerId) {
+		this.id = userId + ":" + shortId;
 		this.userId = userId;
 		this.shortId = shortId;
 		this.ownerId = ownerId;
 	}
+
+	public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
 	public String getUserId() {
 		return userId;
@@ -48,6 +51,14 @@ public class Likes {
 
 	public void setShortId(String shortId) {
 		this.shortId = shortId;
+	}
+
+	public String getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(String ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	@Override

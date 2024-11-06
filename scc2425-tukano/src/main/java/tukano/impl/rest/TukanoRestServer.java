@@ -20,7 +20,7 @@ public class TukanoRestServer extends Application {
 	private static final Logger Log = Logger.getLogger(TukanoRestServer.class.getName());
 
 	static final String INETADDR_ANY = "0.0.0.0";
-	static String SERVER_BASE_URI = "http://%s:%s/rest";
+	static String SERVER_BASE_URI = "http://%s/rest";
 
 	public static final int PORT = 8080;
 
@@ -31,8 +31,8 @@ public class TukanoRestServer extends Application {
 
 	public TukanoRestServer() throws IOException {
 
-
-        serverURI = String.format(SERVER_BASE_URI, IP.hostname(), PORT);
+        String webAppName = "tukano-123456789101112.azurewebsites.net";
+        serverURI = String.format(SERVER_BASE_URI, webAppName);
 
         // Load props
         try {

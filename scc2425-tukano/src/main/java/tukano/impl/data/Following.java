@@ -10,19 +10,29 @@ import jakarta.persistence.Table;
 @Table(name = "following")
 public class Following{
 
-	@Id 
+	@Id
+    String id;
+	
 	String follower;
 	
-	@Id 
 	String followee;
 
 	Following() {}
 
 	public Following(String follower, String followee) {
 		super();
+		this.id = follower + ":" + followee;
 		this.follower = follower;
 		this.followee = followee;
 	}
+
+	public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
 	public String getFollower() {
 		return follower;
@@ -42,7 +52,7 @@ public class Following{
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(followee, follower);
+		return Objects.hash(id, followee, follower);
 	}
 
 	@Override
