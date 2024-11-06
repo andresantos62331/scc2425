@@ -7,13 +7,14 @@ import tukano.api.User;
 import tukano.api.Users;
 import tukano.api.rest.RestUsers;
 import tukano.impl.JavaUsers;
+import tukano.impl.JavaUsersNoSQL;
 
 @Singleton
 public class RestUsersResource extends RestResource implements RestUsers {
 
 	final Users impl;
 	public RestUsersResource() {
-		this.impl = JavaUsers.getInstance();
+		this.impl = JavaUsersNoSQL.getInstance(); // Change here between: JavaUsers and  JavaUsersNoSQL
 	}
 	
 	@Override

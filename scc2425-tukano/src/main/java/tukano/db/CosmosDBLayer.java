@@ -22,7 +22,10 @@ public class CosmosDBLayer {
 	private static final String DB_NAME = System.getProperty("COSMOSDB_DATABASE");
 	private static final String USERS_CONTAINER = "users";
 	private static final String SHORTS_CONTAINER = "shorts";
-	
+	private static final String LIKES_CONTAINER = "likes";
+	private static final String FOLLOWS_CONTAINER = "following";
+
+
 	private static CosmosDBLayer instance;
 
 	public static synchronized CosmosDBLayer getInstance() {
@@ -45,6 +48,8 @@ public class CosmosDBLayer {
 	private CosmosDatabase db;
 	private CosmosContainer usersContainer;
 	private CosmosContainer shortsContainer;
+	private CosmosContainer likesContainer;
+	private CosmosContainer followsContainer;
 	
 	public CosmosDBLayer(CosmosClient client) {
 		this.client = client;
@@ -56,6 +61,8 @@ public class CosmosDBLayer {
 		db = client.getDatabase(DB_NAME);
 		usersContainer = db.getContainer(USERS_CONTAINER);
 		shortsContainer = db.getContainer(SHORTS_CONTAINER);
+		likesContainer = db.getContainer(LIKES_CONTAINER);
+		followsContainer = db.getContainer(FOLLOWS_CONTAINER);
 	}
 
 	public void close() {
@@ -109,6 +116,38 @@ public class CosmosDBLayer {
 			return res.stream().toList();
 		});
 	}
+
+	public <T> Result<T> insertFollow(T obj) {
+		return tryCatch(() -> followsContainer.createItem(obj).getItem());
+	}
+
+	public <T> Result<?> deleteFollow(T obj) {
+		return tryCatch(() -> followsContainer.deleteItem(obj, new CosmosItemRequestOptions()).getItem());
+	}
+	
+	public <T> Result<List<T>> queryFollows(Class<T> clazz, String queryStr) {
+		return tryCatch(() -> {
+			var res = followsContainer.queryItems(queryStr, new CosmosQueryRequestOptions(), clazz);
+			return res.stream().toList();
+		});
+	}
+
+	public <T> Result<T> insertLike(T obj) {
+		return tryCatch(() -> likesContainer.createItem(obj).getItem());
+	}
+
+	public <T> Result<?> deleteLike(T obj) {
+		return tryCatch(() -> likesContainer.deleteItem(obj, new CosmosItemRequestOptions()).getItem());
+	}
+	
+	public <T> Result<List<T>> queryLikes(Class<T> clazz, String queryStr) {
+		return tryCatch(() -> {
+			var res = likesContainer.queryItems(queryStr, new CosmosQueryRequestOptions(), clazz);
+			return res.stream().toList();
+		});
+	}
+
+
 
 	<T> Result<T> tryCatch(Supplier<T> supplierFunc) {
 		try {

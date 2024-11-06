@@ -30,7 +30,7 @@ import tukano.db.CosmosDBLayer;
 
 public class JavaShortsNoSQL implements Shorts {
 
-	private static Logger Log = Logger.getLogger(JavaShorts.class.getName());
+	private static Logger Log = Logger.getLogger(JavaShortsNoSQL.class.getName());
 
 	private static Shorts instance;
 	private CosmosDBLayer dbLayer;
@@ -75,11 +75,11 @@ public class JavaShortsNoSQL implements Shorts {
 				return ok(short1);
 			}
 
-			var query = format("SELECT count(*) FROM Likes l WHERE l.shortId = '%s'", shortId);
-			var likes = dbLayer.queryShorts(Long.class, query);
+			var query = format("SELECT * FROM Likes l WHERE l.shortId = '%s'", shortId);
+			var likes = dbLayer.queryLikes(Likes.class, query).value().size();
 
-			return errorOrValue(dbLayer.getShort(shortId, Short.class), shrt -> {
-				var resultShort = shrt.copyWithLikes_And_Token(likes.get(0));
+			return errorOrValue( (Result<Short>) dbLayer.getShort(shortId, Short.class), shrt -> {
+				var resultShort = shrt.copyWithLikes_And_Token(likes);
 				jedis.set(shortKey, JSON.encode(resultShort)); // Populate cache with the fetched user
 				return resultShort;
 			});
@@ -93,12 +93,11 @@ public class JavaShortsNoSQL implements Shorts {
 		return errorOrResult(getShort(shortId), shrt -> {
 
 			return errorOrResult(okUser(shrt.getOwnerId(), password), user -> {
-				return DB.transaction(hibernate -> {
 
-					hibernate.remove(shrt);
+					dbLayer.deleteShort(shrt);
 
 					var query = format("DELETE Likes l WHERE l.shortId = '%s'", shortId);
-					hibernate.createNativeQuery(query, Likes.class).executeUpdate();
+					dbLayer.queryLikes(Likes.class,query);
 
 					JavaBlobs.getInstance().delete(shrt.getBlobUrl(), Token.get());
 
@@ -106,7 +105,8 @@ public class JavaShortsNoSQL implements Shorts {
 					try (Jedis jedis = RedisCache.getCachePool().getResource()) {
 						jedis.del("short:" + shortId);
 					}
-				});
+
+					return ok();
 			});
 		});
 	}
@@ -147,7 +147,7 @@ public class JavaShortsNoSQL implements Shorts {
 		Log.info(() -> format("followers : userId = %s, pwd = %s\n", userId, password));
 
 		var query = format("SELECT f.follower FROM Following f WHERE f.followee = '%s'", userId);
-		return errorOrValue(okUser(userId, password), dbLayer.queryShorts(query, String.class));
+		return errorOrValue(okUser(userId, password), dbLayer.queryFollows(String.class, query));
 	}
 
 	@Override
@@ -157,7 +157,7 @@ public class JavaShortsNoSQL implements Shorts {
 
 		return errorOrResult(getShort(shortId), shrt -> {
 			var l = new Likes(userId, shortId, shrt.getOwnerId());
-			return errorOrVoid(okUser(userId, password), isLiked ? dbLayer.insertLike(l) : DB.deleteOne(l));
+			return errorOrVoid(okUser(userId, password), isLiked ? dbLayer.insertLike(l) : dbLayer.deleteLike(l));
 		});
 	}
 
@@ -169,7 +169,7 @@ public class JavaShortsNoSQL implements Shorts {
 
 			var query = format("SELECT l.userId FROM Likes l WHERE l.shortId = '%s'", shortId);
 
-			return errorOrValue(okUser(shrt.getOwnerId(), password), dbLayer.queryShorts(query, String.class));
+			return errorOrValue(okUser(shrt.getOwnerId(), password), dbLayer.queryLikes(String.class, query));
 		});
 	}
 
@@ -185,11 +185,11 @@ public class JavaShortsNoSQL implements Shorts {
 						f.followee = s.ownerId AND f.follower = '%s'
 				ORDER BY s.timestamp DESC""";
 
-		return errorOrValue(okUser(userId, password), dbLayer.queryShorts(format(QUERY_FMT, userId, userId), String.class));
+		return errorOrValue(okUser(userId, password), dbLayer.queryShorts(String.class, format(QUERY_FMT, userId, userId)));
 	}
 
 	protected Result<User> okUser(String userId, String pwd) {
-		return JavaUsers.getInstance().getUser(userId, pwd);
+		return JavaUsersNoSQL.getInstance().getUser(userId, pwd);
 	}
 
 	private Result<Void> okUser(String userId) {
@@ -207,21 +207,19 @@ public class JavaShortsNoSQL implements Shorts {
 		if (!Token.isValid(token, userId))
 			return error(FORBIDDEN);
 
-		return DB.transaction((hibernate) -> {
-
 			// delete shorts
 			var query1 = format("DELETE Short s WHERE s.ownerId = '%s'", userId);
-			hibernate.createQuery(query1, Short.class).executeUpdate();
+			dbLayer.queryShorts(Short.class, query1);
 
 			// delete follows
 			var query2 = format("DELETE Following f WHERE f.follower = '%s' OR f.followee = '%s'", userId, userId);
-			hibernate.createQuery(query2, Following.class).executeUpdate();
+			dbLayer.queryFollows(Following.class, query2);
 
 			// delete likes
 			var query3 = format("DELETE Likes l WHERE l.ownerId = '%s' OR l.userId = '%s'", userId, userId);
-			hibernate.createQuery(query3, Likes.class).executeUpdate();
+			dbLayer.queryLikes(Likes.class, query3);
 
-		});
+			return ok();
 	}
 
 }

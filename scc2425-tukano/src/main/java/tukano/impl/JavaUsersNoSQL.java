@@ -25,7 +25,7 @@ import tukano.db.CosmosDBLayer;
 
 public class JavaUsersNoSQL implements Users {
 
-	private static Logger Log = Logger.getLogger(JavaUsers.class.getName());
+	private static Logger Log = Logger.getLogger(JavaUsersNoSQL.class.getName());
 
 	private static Users instance;
 	private CosmosDBLayer dbLayer;
@@ -118,7 +118,7 @@ public class JavaUsersNoSQL implements Users {
 
 			// Delete user shorts and related info asynchronously in a separate thread
 			Executors.defaultThreadFactory().newThread(() -> {
-				JavaShorts.getInstance().deleteAllShorts(id, pwd, Token.get(id));
+				JavaShortsNoSQL.getInstance().deleteAllShorts(id, pwd, Token.get(id));
 				JavaBlobs.getInstance().deleteAllBlobs(id, Token.get(id));
 			}).start();
 

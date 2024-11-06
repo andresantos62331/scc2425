@@ -5,14 +5,18 @@ import java.util.List;
 import jakarta.inject.Singleton;
 import tukano.api.Short;
 import tukano.api.Shorts;
+import tukano.api.Users;
 import tukano.api.rest.RestShorts;
 import tukano.impl.JavaShorts;
+import tukano.impl.JavaShortsNoSQL;
 
 @Singleton
 public class RestShortsResource extends RestResource implements RestShorts {
 
-	static final Shorts impl = JavaShorts.getInstance();
-		
+	final Shorts impl;
+	public RestShortsResource() {
+		this.impl = JavaShortsNoSQL.getInstance(); // Change here between: JavaShorts and  JavaShortsNoSQL
+	}		
 	@Override
 	public Short createShort(String userId, String password) {
 		return super.resultOrThrow( impl.createShort(userId, password));
