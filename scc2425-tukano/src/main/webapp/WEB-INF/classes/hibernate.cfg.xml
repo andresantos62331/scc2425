@@ -2,10 +2,12 @@
 <hibernate-configuration>
 	<session-factory>
 		<!-- JDBC Database connection settings -->
-		<property name="connection.driver_class">org.postgresql.Driver</property>
-        <property name="connection.url">jdbc:postgresql://c-postgre-cluster-proj1.postgres.database.azure.com:5432/postgre-db-proj1</property>
-        <property name="connection.username">citus@c-postgre-cluster-proj1</property>
-        <property name="connection.password">postgresql2425#</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+        <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+        <property name="hibernate.connection.url">jdbc:postgresql://proj1-postgres-server.postgres.database.azure.com:5432/db_postgres</property>
+        <property name="hibernate.connection.username">citus</property>
+        <property name="hibernate.connection.password">postgresql2425#</property>
+        <property name="hibernate.hbm2ddl.auto">update</property>
 		<!-- JDBC connection pool settings ... using built-in test pool -->
 		<property name="connection.pool_size">64</property>
 		<!-- Echo the SQL to stdout -->

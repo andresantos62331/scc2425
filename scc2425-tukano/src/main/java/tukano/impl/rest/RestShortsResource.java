@@ -15,7 +15,7 @@ public class RestShortsResource extends RestResource implements RestShorts {
 
 	final Shorts impl;
 	public RestShortsResource() {
-		this.impl = JavaShortsNoSQL.getInstance(); // Change here between: JavaShorts and  JavaShortsNoSQL
+		this.impl = JavaShorts.getInstance(); // Change here between: JavaShorts and  JavaShortsNoSQL
 	}		
 	@Override
 	public Short createShort(String userId, String password) {
