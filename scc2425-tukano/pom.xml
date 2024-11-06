@@ -1,6 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>scc2425</groupId>
 	<artifactId>tukano</artifactId>
@@ -46,10 +45,10 @@
 				<version>2.13.0</version>
 			    <configuration>
 			        <schemaVersion>v2</schemaVersion>
-			        <resourceGroup>tukano-1730388952740-rg</resourceGroup>
-			        <appName>tukano-1730388952740</appName>
+			        <resourceGroup>scc-backend-rg-71802</resourceGroup>
+			        <appName>tukano-123456789101112</appName>
 			        <pricingTier>F1</pricingTier>
-			        <region>centralus</region>
+			        <region>westeurope</region>
 			        <runtime>
 			            <os>Linux</os>
 			            <javaVersion>Java 17</javaVersion>
