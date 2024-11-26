@@ -8,14 +8,16 @@ import tukano.api.Shorts;
 import tukano.api.Users;
 import tukano.api.rest.RestShorts;
 import tukano.impl.JavaShorts;
+import tukano.impl.JavaShortsNoCache;
 import tukano.impl.JavaShortsNoSQL;
+import tukano.impl.JavaShortsNoSQLNoCache;
 
 @Singleton
 public class RestShortsResource extends RestResource implements RestShorts {
 
 	final Shorts impl;
 	public RestShortsResource() {
-		this.impl = JavaShortsNoSQL.getInstance(); // Change here between: JavaShorts and  JavaShortsNoSQL
+		this.impl = JavaShortsNoSQL.getInstance(); // Change here between: JavaShorts and JavaShortsNoSQL
 	}		
 	@Override
 	public Short createShort(String userId, String password) {
