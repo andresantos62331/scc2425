@@ -8,6 +8,10 @@ import java.util.logging.Logger;
 
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
+import srv.Authentication;
+import srv.ControlResource;
+import srv.auth.RequestCookiesCleanupFilter;
+import srv.auth.RequestCookiesFilter;
 import tukano.impl.Token;
 import utils.Args;
 import utils.IP;
@@ -55,6 +59,11 @@ public class TukanoRestServer extends Application {
         singletons.add(new RestBlobsResource());
         singletons.add(new RestUsersResource());
         singletons.add(new RestShortsResource());
+
+        resources.add(ControlResource.class);
+		resources.add(RequestCookiesFilter.class);
+     	resources.add(RequestCookiesCleanupFilter.class);
+        resources.add(Authentication.class);
 
 
         // Load properties and configurations

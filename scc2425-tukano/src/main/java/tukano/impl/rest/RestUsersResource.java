@@ -16,7 +16,7 @@ public class RestUsersResource extends RestResource implements RestUsers {
 
 	final Users impl;
 	public RestUsersResource() {
-		this.impl = JavaUsersNoSQL.getInstance(); // Change here between: JavaUsers and JavaUsersNoSQL
+		this.impl = JavaUsers.getInstance(); // Change here between: JavaUsers and JavaUsersNoSQL
 	}
 	
 	@Override

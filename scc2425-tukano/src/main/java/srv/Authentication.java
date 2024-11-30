@@ -16,6 +16,8 @@ import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import srv.auth.RequestCookies;
+import tukano.api.User;
+import tukano.db.CosmosDBLayer;
 
 @Path(Authentication.PATH)
 public class Authentication {
@@ -31,11 +33,11 @@ public class Authentication {
 	public Response login( @FormParam(USER) String user, @FormParam(PWD) String password ) {
 		System.out.println("user: " + user + " pwd:" + password );
 
+		User userObj = CosmosDBLayer.getInstance().getUser(user, User.class).value();
 
-
-		boolean pwdOk = true; // replace with code to check user password
-
-
+		boolean pwdOk = false; // check for password
+		String storedPassword = userObj.getPwd();
+		pwdOk = password.equals(storedPassword);
 		
 		if (pwdOk) {
 			String uid = UUID.randomUUID().toString();
@@ -43,7 +45,7 @@ public class Authentication {
 					.value(uid).path("/")
 					.comment("sessionid")
 					.maxAge(MAX_COOKIE_AGE)
-					.secure(false) //ideally it should be true to only work for https requests
+					.secure(false) // it should be true to only work for https requests
 					.httpOnly(true)
 					.build();
 			
